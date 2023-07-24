@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Staatliches' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Thasadith' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HardlyBaflin</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica;
+        }
+
+        .header {
+            background-color: #fcfcfc;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+
+        .header h1 {
+            background-color: white;
+            margin: 0;
+            color:  #ff0019;
+            font-size: 50px;
+            font-family: Staatliches;
+            font-weight: 300;
+        }
+
+        .contact {
+            display: flex;
+            align-items: center;
+        }
+
+        .contact a {
+        font-size: 18px;
+        text-decoration: none;
+        padding-left: 10px;
+        color: black;
+        }
+
+        .contact img {
+            width: 50px;
+            margin-right: -8px;
+            vertical-align: middle;
+            padding: 4px;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .sidebar {
+            background-color: #f3f3f3;
+            color: black;
+            width: 160px;
+            font-size: 15px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 998;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0px;
+            margin-top: 110px;
+        }
+
+        .sidebar li {
+            margin-bottom: -49px;
+            margin-top: 80px;
+        }
+
+        .sidebar a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #ff0019;
+            color: white;
+            padding: 10px;
+            border-radius: 3px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            margin-top: 55px;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            margin-left: 180px;
+        }
+
+        .progress-bar {
+        width: 0%;
+        height: 6px;
+        background-color: #00ff97;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        }
+
+        #season-dropdown,
+        #competition-dropdown,
+        #hteam-dropdown,
+        #ateam-dropdown {
+            width: 170px;
+            height: 26px;
+            font-size: 17px;
+            margin-top: 0px;
+        }
+
+        img {
+        width: 50%;
+        height: 50%;
+        align-items: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>HardlyBaflin</h1>
+        <div class="contact">
+            <a class="twitter" href="https://twitter.com/Sam_Maflin">
+                <img src="/static/twitter.png" alt="Twitter Logo">
+            </a>
+            <a class="email" href="mailto:s.maflin@outlook.com">
+                <img src="/static/email.png" alt="Email Icon">
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="sidebar">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/Acknowledgement">Acknowledgment</a></li>
+                <li><a href="/LetsGetStarted" class="active">Let's Get Started...</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <h2 style="font-size: 55px; font-weight: 300;">Select a match.</h2>
+            <p style="font-size: 12px; color: grey; padding-bottom: 50px; margin-top:-20px;">
+                Note - only available fixture is the World Cup Final 2022: Argentina vs. France.</p>
+            <form id="fixture-form" action="/Analysis" method="post">
+                <p>Select a competition:</p>
+                <select id="competition-dropdown" name="competition">
+                    <option value="" selected disabled>Click here</option>
+                    {% for competition in competitions %}
+                    <option value="{{ competition[0] }}">{{ competition[0] }}</option>
+                    {% endfor %}
+                </select>
+                <p>Select a season:</p>
+                <select id="season-dropdown" name="season" disabled>
+                    <option value="" selected disabled>Click here</option>
+                </select>
+                <p>Select Home Team:</p>
+                <select id="hteam-dropdown" name="hteam" disabled>
+                    <option value="" selected disabled>Click here</option>
+                </select>
+                <p>Select Away Team:</p>
+                <select id="ateam-dropdown" name="ateam" disabled>
+                    <option value="" selected disabled>Click here</option>
+                </select>
+                <p></p>
+                <button id="confirm-button" style="display: none;
+                    background-color: green; color: white; padding: 12px;
+                    border-radius: 5px; width: 10%; font-size: 16px; margin-top: 10px;">
+                    Confirm
+                </button>
+                <p>
+                    <button id="confirm-button-2" class="confirm-button" style="background-color: darkgrey; color: white; padding: 12px;
+                    border-radius: 5px; width: 10%; font-size: 16px; margin-top: 10px;">
+                        Confirm
+                    </button>
+                </p>
+            </form>
+        </div>
+        <div class="progress-bar"></div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var competitionDropdown = document.getElementById("competition-dropdown");
+            var seasonDropdown = document.getElementById("season-dropdown");
+            var hteamDropdown = document.getElementById("hteam-dropdown");
+            var ateamDropdown = document.getElementById("ateam-dropdown");
+            var confirmButton = document.getElementById("confirm-button-2");
+
+            competitionDropdown.addEventListener("change", function () {
+                var selectedCompetition = this.value;
+                if (selectedCompetition !== "") {
+                    filterSeasons(selectedCompetition);
+                } else {
+                    resetAll();
+                }
+                checkAllSelected();
+            });
+
+            seasonDropdown.addEventListener("change", function () {
+                var selectedCompetition = competitionDropdown.value;
+                var selectedSeason = this.value;
+                if (selectedSeason !== "") {
+                    filterHomeTeams(selectedCompetition, selectedSeason);
+                } else {
+                    resetDropdown(hteamDropdown);
+                    resetDropdown(ateamDropdown);
+                    disableDropdown(hteamDropdown);
+                    disableDropdown(ateamDropdown);
+                }
+                checkAllSelected();
+            });
+
+            hteamDropdown.addEventListener("change", function () {
+                var selectedHTeam = this.value;
+                if (selectedHTeam !== "") {
+                    filterAwayTeams(selectedHTeam);
+                } else {
+                    resetDropdown(ateamDropdown);
+                    disableDropdown(ateamDropdown);
+                }
+                checkAllSelected();
+            });
+
+            ateamDropdown.addEventListener("change", function () {
+                checkAllSelected();
+            });
+
+            function checkAllSelected() {
+                if (
+                    competitionDropdown.value !== "" &&
+                    seasonDropdown.value !== "" &&
+                    hteamDropdown.value !== "" &&
+                    ateamDropdown.value !== ""
+                ) {
+                    confirmButton.style.backgroundColor = "green";
+                } else {
+                    confirmButton.style.backgroundColor = "darkgrey";
+                }
+            }
+
+            function filterSeasons(competition) {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var seasons = JSON.parse(xhr.responseText);
+                        updateDropdownOptions(seasonDropdown, seasons);
+                        enableDropdown(seasonDropdown);
+                        resetDropdown(hteamDropdown);
+                        resetDropdown(ateamDropdown);
+                        disableDropdown(hteamDropdown);
+                        disableDropdown(ateamDropdown);
+                    }
+                };
+                xhr.open("GET", "/get_season?competition=" + competition, true);
+                xhr.send();
+            }
+
+            function filterHomeTeams(competition, season) {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var hteams = JSON.parse(xhr.responseText);
+                        updateDropdownOptions(hteamDropdown, hteams);
+                        enableDropdown(hteamDropdown);
+                        resetDropdown(ateamDropdown);
+                        disableDropdown(ateamDropdown);
+                    }
+                };
+                xhr.open(
+                    "GET",
+                    "/getHomeTeams?competition=" + competition + "&season=" + season,
+                    true
+                );
+                xhr.send();
+            }
+
+            function filterAwayTeams(hteam) {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var ateams = JSON.parse(xhr.responseText);
+                        updateDropdownOptions(ateamDropdown, ateams);
+                        enableDropdown(ateamDropdown);
+                    }
+                };
+                var selectedCompetition = competitionDropdown.value;
+                var selectedSeason = seasonDropdown.value;
+                xhr.open(
+                    "GET",
+                    "/getAwayTeams?competition=" +
+                    selectedCompetition +
+                    "&season=" +
+                    selectedSeason +
+                    "&hteam=" +
+                    hteam,
+                    true
+                );
+                xhr.send();
+            }
+
+            function updateDropdownOptions(dropdown, options) {
+                dropdown.innerHTML = '<option value="" selected disabled>Click here</option>';
+                options.forEach(function (option) {
+                    var optionElement = document.createElement("option");
+                    optionElement.value = option;
+                    optionElement.textContent = option;
+                    dropdown.appendChild(optionElement);
+                });
+            }
+
+            function resetDropdown(dropdown) {
+                dropdown.innerHTML = '<option value="" selected disabled>Click here</option>';
+            }
+
+            function disableDropdown(dropdown) {
+                dropdown.disabled = true;
+            }
+
+            function enableDropdown(dropdown) {
+                dropdown.disabled = false;
+            }
+
+            confirmButton.addEventListener("click", function () {
+                if (
+                    competitionDropdown.value !== "" &&
+                    seasonDropdown.value !== "" &&
+                    hteamDropdown.value !== "" &&
+                    ateamDropdown.value !== ""
+                ) {
+                    window.location.href = '/Analysis';
+                }
+            });
+
+            window.addEventListener("scroll", function () {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+                const scrolled = (scrollTop / (scrollHeight - clientHeight)) * 100;
+                document.querySelector(".progress-bar").style.width = scrolled + "%";
+            });
+        });
+    </script>
+</body>
+</html>

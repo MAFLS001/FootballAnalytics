@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Staatliches' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Thasadith' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HardlyBaflin</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica;
+            background-image: url("static/backgroundimage1.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .header {
+            background-color: #fcfcfc;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            top: 0;
+            left: 0;
+            z-index: 999;
+        }
+
+        .header h1 {
+            background-color: white;
+            margin: 0;
+            color:  #ff0019;
+            font-size: 50px;
+            font-family: Staatliches;
+            font-weight: 300;
+        }
+
+        .contact {
+            display: flex;
+            align-items: center;
+        }
+
+        .contact a {
+        font-size: 18px;
+        text-decoration: none;
+        padding-left: 10px;
+        color: black;
+        }
+
+        .contact img {
+            width: 50px;
+            margin-right: -8px;
+            vertical-align: middle;
+            padding: 4px;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .sidebar {
+            background-color: #f3f3f3;
+            color: black;
+            width: 160px;
+            font-size: 15px;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 998;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0px;
+            margin-top: 110px;
+        }
+
+        .sidebar li {
+            margin-bottom: -49px;
+            margin-top: 80px;
+        }
+
+        .sidebar a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #ff0019;
+            color: white;
+            padding: 10px;
+            border-radius: 3px;
+        }
+
+        .h2 {
+            flex: 1;
+            padding: 40px;
+            justify-content: center;
+            align-items: center;
+            margin-left: 180px;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .progress-bar {
+        width: 0%;
+        height: 6px;
+        background-color: #00ff97;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        }
+</style>
+</head>
+<body>
+    <div class="header">
+        <h1>HardlyBaflin</h1>
+        <div class="contact">
+            <a class="twitter" href="https://twitter.com/Sam_Maflin">
+                <img src="/static/twitter.png" alt="Twitter Logo">
+            </a>
+            <a class="email" href="mailto:s.maflin@outlook.com">
+                <img src="/static/email.png" alt="Email Icon">
+            </a>
+        </div>
+    </div>
+    <div class="content">
+        <div class="sidebar">
+            <ul>
+                <li><a href="/" class="active">Home</a></li>
+                <li><a href="/Acknowledgement">Acknowledgment</a></li>
+                <li><a href="/LetsGetStarted">Let's Get Started...</a></li>
+                <li><a href="/Test">Test...</a></li>
+            </ul>
+        </div>
+        <div class="h2">
+        <h2 style="font-size: 140px; font-family: Staatliches; font-weight: 300; ">HardlyBaflin Blog</h2>
+            <div class="main-content">
+            <p style="text-align: justify; line-height: 1.8; padding-left:
+            30px; padding-right: 30px; padding-top: 25px;">Welcome to
+                Hardly Baflin, the place where I attempt to present my
+                observations, data-driven insights, and visualizations related to all
+                things football. The purpose behind this dedicated space is to
+                prove that football analytics can be hugely accessible and
+                insightful to anybody interested. As football analytics has surged in
+                prominence, it has paved the way for some very interesting data-rich
+                narratives able to invigorate seasoned fans and provide newcomers
+                with fresh perspectives on the game we love.</p>
+            <p style="text-align: justify; line-height: 1.8; font-size: 16px; padding-left:
+            25px; padding-right: 25px; padding-top: 10px;">However, despite its
+                growing prominence, football analytics still faces skepticism and
+                uncertainty among certain fans, pundits and media circles. Former footballer
+                and head coach of Tottenham Hotspur and Aston Villa, Tim Sherwood,
+                openly dismisses the approach of utilizing football analytics to assist
+                coaches in finding new strategies for improved match outcomes.
+                <span style="text-align: justify; color: orange; font-size: 35px; font-weight: bold;">&ldquo;</span>
+                <span style="text-align: justify; font-size: 20px; color: orange;">The moto is if you
+                    can't convince, confuse. Transitions? Half spaces? What a load of
+                    nonsense. The guys that make decisions at Football Clubs are
+                    academics, they're getting baffled with Science.</span>
+                <span style="text-align: justify; color: orange; font-size: 35px; font-weight: bold;">&rdquo;</span></p>
+            <p style="text-align: justify; line-height: 1.8; font-size: 16px; padding-left: 25px;
+            padding-right: 25px; padding-bottom: 20px">
+                Sherwood's views are undoubtedly echoed by some, and it is evident that a
+                sense of uncertainty still surrounds many facets of football club
+                performance, fueling this skepticism. However, rather than
+                perpetuate this notion, we will instead follow the growing
+                community that leverages a more scientific approach to shed
+                light upon various football phenomena. 
+                </p>
+        </div>
+        <div class="progress-bar"></div>
+    </div>
+    </div>
+<script>
+window.addEventListener('scroll', function () {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+  const clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+  const scrolled = (scrollTop / (scrollHeight - clientHeight)) * 100;
+  document.querySelector('.progress-bar').style.width = scrolled + '%';
+});
+</script>
+</body>
+</html>

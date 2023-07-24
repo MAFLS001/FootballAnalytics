@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <img src="/static/pitch.png" alt="Soccer Pitch" />
+    <script>
+      // JavaScript to create the grid overlay
+      window.onload = function() {
+        var pitch = document.querySelector("img");
+        var pitchWidth = pitch.offsetWidth;
+        var pitchHeight = pitch.offsetHeight;
+
+        var grid = document.querySelector(".grid");
+        grid.style.width = pitchWidth + "px";
+        grid.style.height = pitchHeight + "px";
+
+        var gridSections = [
+          { x: 1.31, y: 1.428, width: 2.71, height: 2.16 },  // Top Wing Z1
+          { x: 4.02, y: 1.428, width: 3.12, height: 2.16 },  // Top Wing Z2
+          { x: 7.14, y: 1.428, width: 3.12, height: 2.16 },  // Top Wing Z3
+          { x: 10.26, y: 1.428, width: 3.12, height: 2.16 }, // Top Wing Z4
+          { x: 13.38, y: 1.428, width: 3.12, height: 2.16 }, // Top Wing Z5
+          { x: 16.50, y: 1.428, width: 2.71, height: 2.16 }, // Top Wing Z6
+          { x: 4.02, y: 3.588, width: 6.24, height: 1.43 }, // Top Wing Defensive Half Space Z8
+          { x: 4.02, y: 5.018, width: 6.24, height: 2.39 }, // Centre Defensive Midffield Z9
+          { x: 4.02, y: 7.408, width: 6.24, height: 1.43 }, // Bottom Wing Defensive Half Space Z10
+          { x: 10.26, y: 3.588, width: 6.24, height: 1.43 }, // Top Wing Attacking Half Space Z11
+          { x: 10.26, y: 5.018, width: 6.24, height: 2.39 }, // Centre Attacking Midfield Z12
+          { x: 10.26, y: 7.408, width: 6.24, height: 1.43 }, // Bottom Attacking Wing Half Space Z13
+          { x: 1.31, y: 3.588, width: 2.71, height: 5.25 }, // Defending Team Box Z7
+          { x: 1.31, y: 8.838, width: 2.71, height: 2.16 }, // Bottom Wing Z14
+          { x: 4.02, y: 8.838, width: 3.12, height: 2.16 }, // Bottom Wing Z15
+          { x: 7.14, y: 8.838, width: 3.12, height: 2.16 }, // Bottom Wing Z16
+          { x: 10.26, y: 8.838, width: 3.12, height: 2.16 }, // Bottom Wing Z17
+          { x: 13.38, y: 8.838, width: 3.12, height: 2.16 }, // Bottom Wing Z18
+          { x: 16.50, y: 8.838, width: 2.71, height: 2.16 }, // Bottom Wing Z19
+          { x: 16.50, y: 3.588, width: 2.71, height: 5.25 }, // Attacking team box Z20
+        ];
+
+        for (var i = 0; i < gridSections.length; i++) {
+          var section = gridSections[i];
+          var gridBox = document.createElement("div");
+          gridBox.style.position = "absolute";
+          gridBox.style.left = section.x * (pitchWidth / 20) + "px";
+          gridBox.style.top = section.y * (pitchHeight / 12) + "px";
+          gridBox.style.width = section.width * (pitchWidth / 20) + "px";
+          gridBox.style.height = section.height * (pitchHeight / 12) + "px";
+          gridBox.style.zIndex = "2";
+
+          gridBox.addEventListener("mouseover", function() {
+            this.style.background = "rgba(0, 0, 0, 0.4)";
+          });
+
+          gridBox.addEventListener("mouseout", function() {
+            this.style.background = "rgba(0, 0, 0, 0)";
+          });
+
+          grid.appendChild(gridBox);
+        }
+      };
+    </script>
+  </div>
+</body>
+</html>
