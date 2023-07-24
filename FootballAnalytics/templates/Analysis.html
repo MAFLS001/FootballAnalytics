@@ -963,6 +963,7 @@ function updateLineChartData() {
 }
 
 
+
 window.onload = function() {
   // DECLARE GRID SECTIONS
   var gridSections = [
@@ -988,19 +989,24 @@ window.onload = function() {
     { x: 16.26, y: 3.38, width: 2.71, height: 5.25, zone: 20 }, // Z20
   ];
 
-  // CREATE GRID OVERLAY
-  var pitch = document.querySelector("img");
-  var pitchWidth = pitch.offsetWidth * 12;
-  var pitchHeight = pitch.offsetHeight * 9;
-  var grid = document.querySelector(".grid");
+
+  // Get references to the pitch image and the grid container
+  const pitch = document.querySelector("img");
+  const pitchWidth = pitch.offsetWidth * 12;
+  const pitchHeight = pitch.offsetHeight * 9;
+  const grid = document.querySelector(".grid");
   grid.style.width = pitchWidth + "px";
   grid.style.height = pitchHeight + "px";
 
-  var sumValues = [];
+  // Create an array to store the sum values for each grid section
+  const sumValues = gridSections.map(() => ({ element: null, sum: 0 }));
 
-  for (var i = 0; i < gridSections.length; i++) {
-    var section = gridSections[i];
-    var gridBox = document.createElement("div");
+  // Iterate through the grid sections data and create grid boxes with event listeners
+  for (let i = 0; i < gridSections.length; i++) {
+    const section = gridSections[i];
+
+    // Create a div for the grid box
+    const gridBox = document.createElement("div");
     gridBox.style.position = "absolute";
     gridBox.style.left = section.x * (pitchWidth / 20) + "px";
     gridBox.style.top = section.y * (pitchHeight / 12) + "px";
@@ -1009,304 +1015,73 @@ window.onload = function() {
     gridBox.style.zIndex = "2";
     gridBox.style.background = "rgba(0, 0, 0, 0)";
 
-    var sumElement = document.createElement("div");
+    // Create a div to display the sum value for the hovered grid section
+    const sumElement = document.createElement("div");
     sumElement.classList.add("grid-sum");
     sumElement.style.display = "none";
     gridBox.appendChild(sumElement);
 
-    sumValues.push({ element: sumElement, sum: 0 });
-
-    gridBox.addEventListener("mouseover", createMouseOverHandler(i, filteredXTMap));
-    gridBox.addEventListener("mouseout", function() {
-      this.style.background = "rgba(0, 0, 0, 0)";
-      hideAllSumElements();
-    });
-
+    // Add the grid box to the grid container
     grid.appendChild(gridBox);
+
+    // Assign the sum element to the corresponding entry in the sumValues array
+    sumValues[i].element = sumElement;
+
+    // Add event listeners for mouseover and mouseout events on the grid box
+    gridBox.addEventListener("mouseover", createMouseOverHandler(i));
+    gridBox.addEventListener("mouseout", createMouseOutHandler());
   }
 
-
-function filterData() {
-  var selectedTeam = document.getElementById("xteams-select").value;
-  var selectedAction = document.getElementById("xactions-select").value;
-  var selectedPlayer = document.getElementById("xplayers-select").value;
-
-  // Filter the data based on selected options
-  filteredXTMap = xtmap.filter(function(event) {
-    var teamMatch = selectedTeam === "All" || event.team_name === selectedTeam;
-    var actionMatch = selectedAction === "All" || event.type === selectedAction;
-    var playerMatch = selectedPlayer === "All" || event.player_name === selectedPlayer;
-
-    return teamMatch && actionMatch && playerMatch;
-  });
-
-  // Calculate the sum xT for each zone and the total xT
-  var sumXT = Array(gridSections.length).fill(0);
-  var totalXT = 0;
-  var playerXTMap = {};
-
-  filteredXTMap.forEach(function(event) {
-    // Calculate the player xT sums
-    if (playerXTMap.hasOwnProperty(event.player_name)) {
-      playerXTMap[event.player_name] += event.xT;
-    } else {
-      playerXTMap[event.player_name] = event.xT;
-    }
-
-    var startZoneIndex = gridSections.findIndex(function(zone) {
-      return zone.zone === event.start_zone;
-    });
-
-    if (startZoneIndex !== -1) {
-      if (event.end_zone === event.start_zone) {
-        sumXT[startZoneIndex] += event.xT;
-        totalXT += event.xT;
-      } else {
-        var endZoneIndex = gridSections.findIndex(function(zone) {
-          return zone.zone === event.end_zone;
-        });
-
-        if (endZoneIndex !== -1) {
-          sumXT[endZoneIndex] += event.xT;
-          totalXT += event.xT;
-        }
-      }
-    }
-  });
-
-  // Update the sumValues and playerDataElement based on the recalculated values
-  sumValues.forEach(function(zone, index) {
-    var playerDataElement = document.createElement("div");
-
-    for (var playerName in playerXTMap) {
-      if (playerXTMap.hasOwnProperty(playerName)) {
-        var playerSum = playerXTMap[playerName];
-
-        var playerSumParagraph = document.createElement("p");
-        playerSumParagraph.textContent = playerName + ": " + playerSum;
-
-        playerDataElement.appendChild(playerSumParagraph);
-      }
-    }
-
-    zone.element.innerHTML = "";
-    zone.element.appendChild(playerDataElement);
-
-    var maxSum = Math.max(...sumXT);
-    var minSum = Math.min(...sumXT);
-    var sum = sumXT[index];
-
-    var colorValue = (sum - minSum) / (maxSum - minSum);
-    var color = getColorFromGradient(colorValue);
-
-    if (sum === 0) {
-      zone.element.style.background = "none";
-    } else {
-      zone.element.style.background = color;
-    }
-
-    var totalText = zone.element.querySelector(".total-text");
-    if (!totalText) {
-      totalText = document.createElement("div");
-      totalText.classList.add("total-text");
-      totalText.style.fontSize = "16px";
-      zone.element.appendChild(totalText);
-    }
-    totalText.innerText = totalXT === 0 ? "xT: 0.00" : "xT: " + totalXT.toFixed(2);
-
-    zone.element.style.border = index === index ? "1px solid black" : "none";
-    zone.element.style.opacity = index === index ? "0.9" : "0.5";
-    zone.sum = sum.toFixed(2);
-  });
-}
-
-
-
-gridBox.addEventListener("mouseover", createMouseOverHandler(i, filteredXTMap));
-
-function createMouseOverHandler(index, filteredXTMap) {
-  return function() {
-    var section = gridSections[index];
-    var sumXT = Array(gridSections.length).fill(0);
-    var totalXT = 0;
-    var playerXTMap = {};
-
-    // Filter the data based on selected options
-    var filteredData = filteredXTMap.filter(function(event) {
-      return event.start_zone === section.zone;
-    });
-
-    // Calculate sum xT for each zone and the total xT
-    filteredData.forEach(function(event) {
-      if (event.end_zone === section.zone) {
-        sumXT[index] += event.xT;
-        totalXT += event.xT;
-      } else {
-        var remainingZoneIndex = gridSections.findIndex(function(zone) {
-          return zone.zone === event.end_zone;
-        });
-        if (remainingZoneIndex !== -1) {
-          sumXT[remainingZoneIndex] += event.xT;
-          totalXT += event.xT;
-        }
+  // Function to handle mouseover event on grid sections /
+  function createMouseOverHandler(index) {
+    return function () {
+      // Remove borders from all grid sections
+      const gridBoxes = document.querySelectorAll(".grid div");
+      for (let box of gridBoxes) {
+        box.style.border = "none";
       }
 
-      // Calculate the player xT sums for the filtered data
-      if (playerXTMap.hasOwnProperty(event.player_name)) {
-        playerXTMap[event.player_name] += event.xT;
-      } else {
-        playerXTMap[event.player_name] = event.xT;
-      }
-    });
+      // Get the sum element for the current grid section
+      const sumElement = sumValues[index].element;
+      sumElement.style.display = "block";
+      sumElement.style.left = this.style.left;
+      sumElement.style.top = this.style.top;
+      this.style.background = "rgba(0, 0, 0, 0.5)";
+      this.style.border = "1px solid black"; // Add black border on hover
 
-      // Remove previous data from sumValues div
-      while (sumValues[index].element.firstChild) {
-        sumValues[index].element.removeChild(sumValues[index].element.firstChild);
-      }
+      // Get the zone value for the current grid section
+      const zone = gridSections[index].zone;
 
-      // Create a new HTML element to hold the summed player data
-      var playerDataElement = document.createElement("div");
+      // Filter the filteredXTMap data to get rows with matching zone value
+      const filteredRows = filteredXTMap.filter(function (row) {
+        return row.start_zone === zone;
+      });
 
-      // Iterate over the playerXTMap to display the player_name and xT values
-      for (var playerName in playerXTMap) {
-        if (playerXTMap.hasOwnProperty(playerName)) {
-          var playerSum = playerXTMap[playerName];
+      // Calculate the sum of xT values for the filtered rows
+      const sumXt = filteredRows.reduce(function (acc, row) {
+        return acc + row.xT;
+      }, 0);
 
-          // Create a paragraph element to display the player_name and xT sum
-          var playerSumParagraph = document.createElement("p");
-          playerSumParagraph.textContent = playerName + ": " + playerSum;
-
-          // Append the paragraph element to the playerDataElement
-          playerDataElement.appendChild(playerSumParagraph);
-        }
-      }
-
-      // Append the playerDataElement to the sumValues[index].element div
-      sumValues[index].element.appendChild(playerDataElement);
-
-      var maxSum = 0.3;
-      var minSum = 0;
-
-      for (var i = 0; i < sumValues.length; i++) {
-        var zone = sumValues[i];
-        var sum = i === index ? sumXT[index] : sumXT[i];
-
-        var colorValue = (sum - minSum) / (maxSum - minSum);
-        var color = getColorFromGradient(colorValue);
-
-        if (sum === 0 && i !== index) {
-          zone.element.style.background = "none";
-        } else {
-          zone.element.style.background = color;
-        }
-
-        if (i === index) {
-          var totalText = zone.element.querySelector(".total-text");
-          if (!totalText) {
-            totalText = document.createElement("div");
-            totalText.classList.add("total-text");
-            totalText.style.fontSize = "16px";
-            zone.element.appendChild(totalText);
-          }
-          totalText.innerText = totalXT === 0 ? "xT: 0.00" : "xT: " + totalXT.toFixed(2);
-          zone.element.style.background = color;
-        } else {
-          zone.element.innerText = "";
-        }
-
-      zone.element.style.border = i === index ? "1px solid black" : "none";
-      zone.element.style.opacity = i === index ? "0.9" : "0.5";
-      zone.sum = sum.toFixed(2);
-      zone.element.style.textAlign = "center";
-      zone.element.style.lineHeight = "2";
-      zone.element.style.color = "black";
-      zone.element.style.fontFamily = "Staatliches";
-
-      var zoneWidth = parseFloat(zone.element.parentElement.style.width);
-      var zoneHeight = parseFloat(zone.element.parentElement.style.height);
-      zone.element.style.position = "absolute";
-      zone.element.style.left = "0";
-      zone.element.style.top = "1";
-      zone.element.style.width = zoneWidth + "px";
-      zone.element.style.height = zoneHeight + "px";
-      zone.element.style.display = "block";
-    }
-  };
-}
-
-
-function getColorFromGradient(value) {
-  var colorStart = [255, 190, 10];
-  var colorEnd = [255, 0, 25];
-
-  if (value >= 0.5) {
-    return "rgb(" + colorEnd[0] + "," + colorEnd[1] + "," + colorEnd[2] + ")";
-  } else if (value <= 0) {
-    return "rgb(" + colorStart[0] + "," + colorStart[1] + "," + colorStart[2] + ")";
+      // Display the sum value inside the sum element for the hovered grid section
+      sumElement.textContent = "Sum: " + sumXt.toFixed(2);
+    };
   }
 
-  var threshold = 0.05; // Fixed threshold value
-  var numIntervals = Math.floor(value / threshold);
-  var intervalValue = numIntervals * threshold;
+  // Function to handle mouseout event on grid sections
+  function createMouseOutHandler() {
+    return function () {
+      this.style.background = "rgba(0, 0, 0, 0)";
+      this.style.border = "none"; // Remove border on mouseout
 
-  var r = colorStart[0] - (colorStart[0] - colorEnd[0]) * (intervalValue / 0.5);
-  var g = colorStart[1] - (colorStart[1] - colorEnd[1]) * (intervalValue / 0.5);
-  var b = colorStart[2] - (colorStart[2] - colorEnd[2]) * (intervalValue / 0.5);
-
-  return "rgb(" + Math.round(r) + "," + Math.round(g) + "," + Math.round(b) + ")";
-}
-
-  function hideAllSumElements() {
-    sumValues.forEach(function(zone) {
-      zone.element.style.display = "none";
-    });
-    var totalXT = calculateTotalXT();
-    sumValues.forEach(function(zone) {
-      zone.element.innerText = "Combined xT: " + totalXT;
-      var totalText = document.createElement("div");
-      totalText.innerText = "Total xT: " + totalXT;
-      totalText.style.fontSize = "13px";
-      zone.element.appendChild(totalText);
-    });
+      // Hide all sum elements
+      const sumElements = document.querySelectorAll(".grid-sum");
+      for (let element of sumElements) {
+        element.style.display = "none";
+      }
+    };
   }
-
-function populateDropdown(dropdown, options, selectedValue) {
-  // Store the selected value before clearing the options
-  var previousSelectedValue = dropdown.value;
-
-  // Clear existing options
-  dropdown.innerHTML = "";
-
-  // Add default option
-  var defaultOption = document.createElement("option");
-  defaultOption.value = "All";
-  defaultOption.text = "All";
-  dropdown.appendChild(defaultOption);
-
-  // Add filtered options without duplicates
-  options.forEach(function(option) {
-    var optionElement = document.createElement("option");
-    optionElement.value = option;
-    optionElement.text = option;
-    dropdown.appendChild(optionElement);
-  });
-
-  // Set the selected value
-  dropdown.value = selectedValue;
-
-  // If the selected value was not present in the filtered options, revert to the previous selected value
-  if (dropdown.value !== selectedValue) {
-    dropdown.value = previousSelectedValue;
-  }
-
-hideAllSumElements();
-
-// ADD EVENT LISTENERS TO DROPDOWN MENUS
-document.getElementById("xteams-select").addEventListener("change", filterData);
-document.getElementById("xactions-select").addEventListener("change", filterData);
-document.getElementById("xplayers-select").addEventListener("change", filterData);
 };
-}
+
 
 
 // DECLARE TEAM LEGEND VARIABLES
