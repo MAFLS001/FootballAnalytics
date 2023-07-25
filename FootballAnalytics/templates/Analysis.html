@@ -1034,38 +1034,61 @@ window.onload = function() {
 
   // Function to handle mouseover event on grid sections /
   function createMouseOverHandler(index) {
-    return function () {
-      // Remove borders from all grid sections
-      const gridBoxes = document.querySelectorAll(".grid div");
-      for (let box of gridBoxes) {
-        box.style.border = "none";
-      }
+  return function () {
+    // Remove borders from all grid sections
+    const gridBoxes = document.querySelectorAll(".grid div");
+    for (let box of gridBoxes) {
+      box.style.border = "none";
+    }
 
-      // Get the sum element for the current grid section
-      const sumElement = sumValues[index].element;
-      sumElement.style.display = "block";
-      sumElement.style.left = this.style.left;
-      sumElement.style.top = this.style.top;
-      this.style.background = "rgba(0, 0, 0, 0.5)";
-      this.style.border = "1px solid black"; // Add black border on hover
+    // Get the sum element for the current grid section
+    const sumElement = sumValues[index].element;
+    sumElement.style.display = "block";
+    sumElement.style.left = this.style.left;
+    sumElement.style.top = this.style.top;
+    this.style.background = "rgba(0, 0, 0, 0.5)";
+    this.style.border = "1px solid black"; // Add black border on hover
 
-      // Get the zone value for the current grid section
-      const zone = gridSections[index].zone;
+    // Get the zone value for the current grid section
+    const zone = gridSections[index].zone;
 
-      // Filter the filteredXTMap data to get rows with matching zone value
-      const filteredRows = filteredXTMap.filter(function (row) {
-        return row.start_zone === zone;
+    // Get the selected values from the dropdowns
+    const selectedTeam = document.getElementById('xteams-select').value;
+    const selectedAction = document.getElementById('xactions-select').value;
+    const selectedPlayer = document.getElementById('xplayers-select').value;
+
+    // Filter the filteredXTMap data based on the zone and the selected values
+    let filteredRows = filteredXTMap;
+    filteredRows = filteredRows.filter(function (row) {
+      return row.start_zone === zone;
+    });
+    if (selectedTeam !== 'All') {
+      filteredRows = filteredRows.filter(function (row) {
+        return row.team_name === selectedTeam;
       });
+    }
+    if (selectedAction !== 'All') {
+      filteredRows = filteredRows.filter(function (row) {
+        return row.type === selectedAction;
+      });
+    }
+    if (selectedPlayer !== 'All') {
+      filteredRows = filteredRows.filter(function (row) {
+        return row.player_name === selectedPlayer;
+      });
+    }
 
-      // Calculate the sum of xT values for the filtered rows
-      const sumXt = filteredRows.reduce(function (acc, row) {
-        return acc + row.xT;
-      }, 0);
+    // Calculate the sum of xT values for the filtered rows
+    const sumXt = filteredRows.reduce(function (acc, row) {
+      return acc + row.xT;
+    }, 0);
 
-      // Display the sum value inside the sum element for the hovered grid section
-      sumElement.textContent = "Sum: " + sumXt.toFixed(2);
-    };
-  }
+    // Display the sum value inside the sum element for the hovered grid section
+    sumElement.textContent = "Sum: " + sumXt.toFixed(2);
+  };
+}
+
+
 
   // Function to handle mouseout event on grid sections
   function createMouseOutHandler() {
@@ -1079,12 +1102,67 @@ window.onload = function() {
         element.style.display = "none";
       }
     };
+
   }
+
+  
+  // Function to update dropdown options
+  function updateDropdownOptions(selectId, options, selectedValue) {
+    var selectElement = document.getElementById(selectId);
+    selectElement.innerHTML = '';
+    for (var i = 0; i < options.length; i++) {
+      var option = document.createElement('option');
+      option.value = options[i];
+      option.text = options[i];
+      selectElement.appendChild(option);
+    }
+
+    // Set the selected value for the dropdown
+    selectElement.value = selectedValue;
+  }
+
+  // Function to update dropdowns and recreate grid based on selected values
+  function updateDropdowns() {
+    const selectedTeam = document.getElementById('xteams-select').value;
+    const selectedAction = document.getElementById('xactions-select').value;
+    const selectedPlayer = document.getElementById('xplayers-select').value;
+
+    // Filter the options for each dropdown based on selected values
+    const filteredXTMapWithSelection = filteredXTMap.filter(function (d) {
+      return (selectedTeam === 'All' || d.team_name === selectedTeam) &&
+        (selectedAction === 'All' || d.type === selectedAction);
+    });
+    const updatedTeams = ['All'].concat([...new Set(filteredXTMap.map(function (d) {
+      return d.team_name;
+    }))]);
+    const updatedActions = ['All'].concat([...new Set(filteredXTMap.map(function (d) {
+      return d.type;
+    }))]);
+    const updatedPlayers = ['All'].concat([...new Set(filteredXTMapWithSelection.map(function (d) {
+      return d.player_name;
+    }))]);
+
+    updateDropdownOptions('xteams-select', updatedTeams, selectedTeam);
+    updateDropdownOptions('xactions-select', updatedActions, selectedAction);
+    updateDropdownOptions('xplayers-select', updatedPlayers, selectedPlayer);
+
+    // Re-filter the filteredXTMap data based on the selected options
+    filterXTMap(selectedTeam, selectedAction, selectedPlayer);
+
+    // Re-create the grid with the filtered data
+    createGrid();
+  }
+
+  // Add event listeners to the dropdowns
+  document.getElementById('xteams-select').addEventListener('change', updateDropdowns);
+  document.getElementById('xactions-select').addEventListener('change', updateDropdowns);
+  document.getElementById('xplayers-select').addEventListener('change', updateDropdowns);
+
+  // Initial setup of dropdown options
+  updateDropdowns();
 };
 
 // Test
-
-
 
 // DECLARE TEAM LEGEND VARIABLES
 var teamLegendX = 65; // X position of the team legend box
