@@ -179,6 +179,16 @@
           position: relative;
           display: inline-block;
         }
+        .grid-sum-value {
+          position: absolute;
+          display: none;
+          background-color: rgba(255, 255, 255, 0.8);
+          color: black;
+          padding: 4px;
+          border-radius: 4px;
+          font-size: 14px;
+          z-index: 3;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.7.0/nouislider.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.7.0/nouislider.min.js"></script>
@@ -963,7 +973,6 @@ function updateLineChartData() {
 }
 
 
-
 window.onload = function() {
   // DECLARE GRID SECTIONS
   var gridSections = [
@@ -989,7 +998,6 @@ window.onload = function() {
     { x: 16.26, y: 3.38, width: 2.71, height: 5.25, zone: 20 }, // Z20
   ];
 
-
   // Get references to the pitch image and the grid container
   const pitch = document.querySelector("img");
   const pitchWidth = pitch.offsetWidth * 12;
@@ -1001,97 +1009,112 @@ window.onload = function() {
   // Create an array to store the sum values for each grid section
   const sumValues = gridSections.map(() => ({ element: null, sum: 0 }));
 
-  // Iterate through the grid sections data and create grid boxes with event listeners
-  for (let i = 0; i < gridSections.length; i++) {
-    const section = gridSections[i];
+// Iterate through the grid sections data and create grid boxes with event listeners
+for (let i = 0; i < gridSections.length; i++) {
+  const section = gridSections[i];
 
-    // Create a div for the grid box
-    const gridBox = document.createElement("div");
-    gridBox.style.position = "absolute";
-    gridBox.style.left = section.x * (pitchWidth / 20) + "px";
-    gridBox.style.top = section.y * (pitchHeight / 12) + "px";
-    gridBox.style.width = section.width * (pitchWidth / 20) + "px";
-    gridBox.style.height = section.height * (pitchHeight / 12) + "px";
-    gridBox.style.zIndex = "2";
-    gridBox.style.background = "rgba(0, 0, 0, 0)";
+  // Create a div for the grid box
+  const gridBox = document.createElement("div");
+  gridBox.style.position = "absolute";
+  gridBox.style.left = section.x * (pitchWidth / 20) + "px";
+  gridBox.style.top = section.y * (pitchHeight / 12) + "px";
+  gridBox.style.width = section.width * (pitchWidth / 20) + "px";
+  gridBox.style.height = section.height * (pitchHeight / 12) + "px";
+  gridBox.style.zIndex = "2";
+  gridBox.style.background = "rgba(0, 0, 0, 0)";
 
-    // Create a div to display the sum value for the hovered grid section
-    const sumElement = document.createElement("div");
-    sumElement.classList.add("grid-sum");
-    sumElement.style.display = "none";
-    gridBox.appendChild(sumElement);
-    // Add the grid box to the grid container
-    grid.appendChild(gridBox);
+  // Create a div to display the sum value for the hovered grid section
+  const sumElement = document.createElement("div");
+  sumElement.classList.add("grid-sum");
+  sumElement.style.display = "none";
+  gridBox.appendChild(sumElement);
+  // Add the grid box to the grid container
+  grid.appendChild(gridBox);
 
-    // Assign the sum element to the corresponding entry in the sumValues array
-    sumValues[i].element = sumElement;
+  // Assign the sum element to the corresponding entry in the sumValues array
+  sumValues[i].element = sumElement;
 
-    // Add event listeners for mouseover and mouseout events on the grid box
-    gridBox.addEventListener("mouseover", createMouseOverHandler(i));
-    gridBox.addEventListener("mouseout", createMouseOutHandler());
-  }
-
-  // Function to handle mouseover event on grid sections /
-  function createMouseOverHandler(index) {
-  return function () {
-    // Remove borders from all grid sections
-    const gridBoxes = document.querySelectorAll(".grid div");
-    for (let box of gridBoxes) {
-      box.style.border = "none";
-    }
-
-    // Get the sum element for the current grid section
-    const sumElement = sumValues[index].element;
-    sumElement.style.display = "block";
-    sumElement.style.left = this.style.left;
-    sumElement.style.top = this.style.top;
-    this.style.background = "rgba(0, 0, 0, 0.5)";
-    this.style.border = "1px solid black"; // Add black border on hover
-
-    // Get the zone value for the current grid section
-    const zone = gridSections[index].zone;
-
-    // Get the selected values from the dropdowns
-    const selectedTeam = document.getElementById('xteams-select').value;
-    const selectedAction = document.getElementById('xactions-select').value;
-    const selectedPlayer = document.getElementById('xplayers-select').value;
-
-    // Filter the filteredXTMap data based on the zone and the selected values
-    let filteredRows = filteredXTMap;
-    filteredRows = filteredRows.filter(function (row) {
-      return row.start_zone === zone;
-    });
-    if (selectedTeam !== 'All') {
-      filteredRows = filteredRows.filter(function (row) {
-        return row.team_name === selectedTeam;
-      });
-    }
-    if (selectedAction !== 'All') {
-      filteredRows = filteredRows.filter(function (row) {
-        return row.type === selectedAction;
-      });
-    }
-    if (selectedPlayer !== 'All') {
-      filteredRows = filteredRows.filter(function (row) {
-        return row.player_name === selectedPlayer;
-      });
-    }
-
-    // Calculate the sum of xT values for the filtered rows
-    const sumXt = filteredRows.reduce(function (acc, row) {
-      return acc + row.xT;
-    }, 0);
-
-    // Display the sum value inside the sum element for the hovered grid section
-    sumElement.textContent = "Sum: " + sumXt.toFixed(2);
-  };
+  // Add event listeners for mouseover and mouseout events on the grid box
+  gridBox.addEventListener("mouseover", createMouseOverHandler(i));
+  gridBox.addEventListener("mouseout", createMouseOutHandler());
 }
 
+  // Function to recalculate and display xT sum values for all zones
+  function calculateAndDisplayAllSums() {
+    // Calculate the sums for all zones
+    calculateSumsForAllZones();
 
+    // Display the sums for all zones
+    updateSumsForAllZones();
+  }
+
+  // Call the function to calculate and display sums for all zones when the page loads
+  calculateAndDisplayAllSums();
+
+  function createMouseOverHandler(index) {
+    return function () {
+      // Remove borders from all grid sections
+      const gridBoxes = document.querySelectorAll(".grid div");
+      for (let box of gridBoxes) {
+        box.style.border = "none";
+      }
+
+      // Get the sum element for the current grid section
+      const sumElement = sumValues[index].element;
+
+      // Get the zone value for the current grid section
+      const zone = gridSections[index].zone;
+
+      // Hide all sum elements except for the current grid section
+      for (let i = 0; i < sumValues.length; i++) {
+        const otherSumElement = sumValues[i].element;
+        if (i !== index) {
+          otherSumElement.style.display = "none";
+        }
+      }
+
+      // Get the selected values from the dropdowns
+      const selectedTeam = document.getElementById('xteams-select').value;
+      const selectedAction = document.getElementById('xactions-select').value;
+      const selectedPlayer = document.getElementById('xplayers-select').value;
+
+      // Filter the filteredXTMap data based on the zone and the selected values
+      let filteredRows = filteredXTMap;
+      filteredRows = filteredRows.filter(function (row) {
+        return row.start_zone === zone;
+      });
+      if (selectedTeam !== 'All') {
+        filteredRows = filteredRows.filter(function (row) {
+          return row.team_name === selectedTeam;
+        });
+      }
+      if (selectedAction !== 'All') {
+        filteredRows = filteredRows.filter(function (row) {
+          return row.type === selectedAction;
+        });
+      }
+      if (selectedPlayer !== 'All') {
+        filteredRows = filteredRows.filter(function (row) {
+          return row.player_name === selectedPlayer;
+        });
+      }
+
+      // Sum the xT values for the filtered rows
+      const sum = filteredRows.reduce((acc, row) => acc + row.xT, 0);
+
+      // Display the sum inside the hovered grid section
+      sumElement.innerText = `Sum: ${sum.toFixed(2)}`; // Display the sum with 2 decimal places
+      sumElement.style.display = "block";
+      sumElement.style.left = this.style.left;
+      sumElement.style.top = this.style.top;
+      this.style.background = "rgba(0, 0, 0, 0.5)";
+      this.style.border = "1px solid black"; // Add black border on hover
+    };
+  }
 
   // Function to handle mouseout event on grid sections
   function createMouseOutHandler() {
-    return function () {
+    return function() {
       this.style.background = "rgba(0, 0, 0, 0)";
       this.style.border = "none"; // Remove border on mouseout
 
@@ -1100,11 +1123,71 @@ window.onload = function() {
       for (let element of sumElements) {
         element.style.display = "none";
       }
-    };
 
+      // Calculate the sums for all zones
+      calculateSumsForAllZones();
+
+      // Display the sums for all zones
+      updateSumsForAllZones();
+
+      // Calculate and display the sums for all zones
+      calculateAndDisplayAllSums();
+    };
   }
 
-  
+  // Function to calculate the sums for all zones
+  function calculateSumsForAllZones() {
+    // Get the selected values from the dropdowns
+    const selectedTeam = document.getElementById('xteams-select').value;
+    const selectedAction = document.getElementById('xactions-select').value;
+    const selectedPlayer = document.getElementById('xplayers-select').value;
+
+    // Calculate the sum for each zone
+    for (let i = 0; i < gridSections.length; i++) {
+      const zone = gridSections[i].zone;
+
+      // Filter the filteredXTMap data based on the zone and the selected values
+      let filteredRows = filteredXTMap;
+      filteredRows = filteredRows.filter(function(row) {
+        return row.start_zone === zone;
+      });
+      if (selectedTeam !== 'All') {
+        filteredRows = filteredRows.filter(function(row) {
+          return row.team_name === selectedTeam;
+        });
+      }
+      if (selectedAction !== 'All') {
+        filteredRows = filteredRows.filter(function(row) {
+          return row.type === selectedAction;
+        });
+      }
+      if (selectedPlayer !== 'All') {
+        filteredRows = filteredRows.filter(function(row) {
+          return row.player_name === selectedPlayer;
+        });
+      }
+
+      // Sum the xT values for the filtered rows
+      const sum = filteredRows.reduce((acc, row) => acc + row.xT, 0);
+
+      // Update the sum for the zone in the sumValues array
+      sumValues[i].sum = sum;
+    }
+  }
+
+
+  // Function to update the sums for all zones in the DOM
+  function updateSumsForAllZones() {
+    for (let i = 0; i < sumValues.length; i++) {
+      const sumValue = sumValues[i].sum;
+      const zoneElement = sumValues[i].element;
+      zoneElement.innerText = `Sum: ${sumValue.toFixed(2)}`;
+      zoneElement.style.display = "block";
+      zoneElement.style.left = gridSections[i].x * (pitchWidth / 20) + "px";
+      zoneElement.style.top = gridSections[i].y * (pitchHeight / 12) + "px";
+    }
+  }
+
   // Function to update dropdown options
   function updateDropdownOptions(selectId, options, selectedValue) {
     var selectElement = document.getElementById(selectId);
@@ -1127,17 +1210,17 @@ window.onload = function() {
     const selectedPlayer = document.getElementById('xplayers-select').value;
 
     // Filter the options for each dropdown based on selected values
-    const filteredXTMapWithSelection = filteredXTMap.filter(function (d) {
+    const filteredXTMapWithSelection = filteredXTMap.filter(function(d) {
       return (selectedTeam === 'All' || d.team_name === selectedTeam) &&
         (selectedAction === 'All' || d.type === selectedAction);
     });
-    const updatedTeams = ['All'].concat([...new Set(filteredXTMap.map(function (d) {
+    const updatedTeams = ['All'].concat([...new Set(filteredXTMap.map(function(d) {
       return d.team_name;
     }))]);
-    const updatedActions = ['All'].concat([...new Set(filteredXTMap.map(function (d) {
+    const updatedActions = ['All'].concat([...new Set(filteredXTMap.map(function(d) {
       return d.type;
     }))]);
-    const updatedPlayers = ['All'].concat([...new Set(filteredXTMapWithSelection.map(function (d) {
+    const updatedPlayers = ['All'].concat([...new Set(filteredXTMapWithSelection.map(function(d) {
       return d.player_name;
     }))]);
 
@@ -1148,8 +1231,26 @@ window.onload = function() {
     // Re-filter the filteredXTMap data based on the selected options
     filterXTMap(selectedTeam, selectedAction, selectedPlayer);
 
-    // Re-create the grid with the filtered data
-    createGrid();
+    // Calculate the sums for all zones
+    calculateSumsForAllZones();
+
+    // Display the sums for all zones
+    updateSumsForAllZones();
+    
+    // Calculate and display the sums for all zones
+    calculateAndDisplayAllSums();
+  }
+
+    // Function to calculate and display sums for all zones when the filteredXTMap data is ready
+    function calculateAndDisplaySumsWhenReady() {
+    // Check if the filteredXTMap data is ready
+    if (filteredXTMap) {
+      // Call the function to calculate and display sums for all zones
+      calculateAndDisplayAllSums();
+    } else {
+      // If the data is not ready, wait for a short duration and then check again
+      setTimeout(calculateAndDisplaySumsWhenReady, 50);
+    }
   }
 
   // Add event listeners to the dropdowns
@@ -1159,6 +1260,15 @@ window.onload = function() {
 
   // Initial setup of dropdown options
   updateDropdowns();
+
+  // Call the function to calculate and display sums for all zones when the page loads
+  calculateSumsForAllZones();
+
+  // Display the sums for all zones
+  updateSumsForAllZones();
+
+  // Call the function to calculate and display sums for all zones when the page loads
+  calculateAndDisplaySumsWhenReady();
 };
 
 // Test
