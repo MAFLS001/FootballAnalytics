@@ -1,0 +1,5 @@
+.smaller-filter-container {
+    width: 40%; /* Adjust the width as needed */
+    display: inline-block;
+    margin-right: 10px; /* Add some spacing between filters */
+}
